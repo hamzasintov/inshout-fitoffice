@@ -2,10 +2,18 @@ import { Box, Typography } from "@mui/material";
 import ContentCard from "../../atoms/ContentCard";
 import TextInput from "../../atoms/TextInput";
 import PrimaryButton from "../../atoms/PrimaryButton";
+import { useDispatch } from "react-redux";
+import { addPackage } from "@/app/features/dashboard/packageSlice";
+import { useState } from "react";
 
 const PackageProcessingCard = () => {
+  const dispatch = useDispatch();
+
+  const [barcode, setBarcode] = useState("");
+
   const handleSave = () => {
-    console.log("save button is clicked");
+    dispatch(addPackage({ barcode: barcode }));
+    console.log("save button is clicked", barcode);
   };
   return (
     <ContentCard height={200}>
@@ -18,7 +26,13 @@ const PackageProcessingCard = () => {
       >
         PACKAGE PROCESSING
       </Typography>
-      <TextInput label="Barcode Number" type="Number" fullWidth />
+      <TextInput
+        label="Barcode Number"
+        type="Number"
+        value={barcode}
+        onChange={(e) => setBarcode(e.target.value)}
+        fullWidth
+      />
       <Box
         sx={{
           display: "flex",
@@ -29,8 +43,10 @@ const PackageProcessingCard = () => {
         <PrimaryButton
           label="Save"
           variant="contained"
-          backgroundColor="#007A35"
+          backgroundColor="#2C3680"
+          textColor="white"
           handleOnClick={handleSave}
+          disabled={false}
         />
       </Box>
     </ContentCard>

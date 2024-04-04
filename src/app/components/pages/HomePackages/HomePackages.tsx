@@ -44,21 +44,34 @@ const HomePackages = () => {
                 label="Export to XLSX"
                 variant="outlined"
                 handleOnClick={handleExportToXLSX}
+                disabled={false}
+                marginLeft={0.5}
+                marginRight={0.5}
               />
               <PrimaryButton
                 label="Clear"
                 variant="outlined"
                 handleOnClick={handleClear}
+                disabled={false}
+                marginLeft={0.5}
+                marginRight={0.5}
               />
               <PrimaryButton
                 label="Print"
                 variant="outlined"
                 handleOnClick={handlePrint}
+                disabled={false}
+                marginLeft={0.5}
+                marginRight={0.5}
               />
               <PrimaryButton
                 label="View"
                 variant="contained"
+                textColor="white"
                 handleOnClick={handleView}
+                disabled={false}
+                marginLeft={0.5}
+                marginRight={0.5}
               />
             </Box>
           </ContentCard>

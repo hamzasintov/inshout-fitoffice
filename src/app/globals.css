@@ -2,6 +2,27 @@
 @tailwind components;
 @tailwind utilities;
 
+@font-face {
+  font-family: Lulo;
+  src: url("/fonts/Lulo-Clean-One.otf");
+  format: ("otf");
+  font-display: swap;
+}
+
+@font-face {
+  font-family: Bolt;
+  src: url("/fonts/Bolt-Rounded.otf");
+  format: ("otf");
+  font-display: swap;
+}
+
+@font-face {
+  font-family: KontoraThin;
+  src: url("/fonts/Kontora-Thin.otf");
+  format: ("otf");
+  font-display: swap;
+}
+
 /* :root {
   --foreground-rgb: 0, 0, 0;
   --background-start-rgb: 214, 219, 220;

@@ -16,13 +16,14 @@ import ListItemButton from "@mui/material/ListItemButton";
 import { FC } from "react";
 import Image from "next/image";
 
-import logo from "../../../public/logo.svg";
+import logo from "../../../public/bellIcon.svg";
+import newLogo from "../../../public/fit-of.png";
 
-import dashboardIcon from "../../../public/dashboardIcon.svg";
-import fitHubIcon from "../../../public/fithubIcon.svg";
-import copyIcon from "../../../public/copyIcon.svg";
-import trackingIcon from "../../../public/trackingIcon.svg";
-import workDocs from "../../../public/workDocs.svg";
+import dashboardIconBlack from "../../../public/dashboardIconBlack.svg";
+import fitHubIconBlack from "../../../public/fitHubIconBlack.svg";
+import copyIconBlack from "../../../public/copyIconBlack.svg";
+import trackingIconBlack from "../../../public/trackingIconBlack.svg";
+import workDocsBlack from "../../../public/workDocsIconBlack.svg";
 import BreadcrumbNav from "../components/molecules/BreadcrumbNav";
 import ProfileOptions from "../components/molecules/ProfileOptions";
 
@@ -134,47 +135,41 @@ const MiniDrawer: FC<DashboardLayoutProps> = ({ children }) => {
   const listItem = [
     {
       text: "DASHBOARD",
-      image: dashboardIcon,
+      image: dashboardIconBlack,
     },
     {
       text: "FIT Hub",
-      image: fitHubIcon,
+      image: fitHubIconBlack,
     },
     {
       text: "COPY CENTER REQUEST",
-      image: copyIcon,
+      image: copyIconBlack,
     },
     {
       text: "TRACKING",
-      image: trackingIcon,
+      image: trackingIconBlack,
     },
     {
       text: "WORK DOCS",
-      image: workDocs,
+      image: workDocsBlack,
     },
   ];
 
   const drawer = (
     <Box>
-      <Image
-        className=" mt-2 pl-2 pr-2"
-        src={logo}
-        height={44}
-        width={146}
-        alt="logo"
-      />
+      <Image className=" mt-2 pl-2 pr-2" src={newLogo} width={200} alt="logo" />
       <List
         sx={{
-          marginTop: "80px",
+          marginTop: "100px",
         }}
       >
         {listItem.map((item, index) => (
           <ListItem key={item.text} disablePadding>
             <ListItemButton
               sx={{
-                color: "white",
+                color: "black",
                 "&:hover": {
-                  backgroundColor: "#094DAE",
+                  backgroundColor: "#2C368080",
                 },
               }}
             >
@@ -200,6 +195,7 @@ const MiniDrawer: FC<DashboardLayoutProps> = ({ children }) => {
                       marginTop: "8px",
                       textAlign: "center",
                       fontSize: "11px",
+                      fontWeight: 800,
                     }}
                   >
                     {item.text}
@@ -219,7 +215,7 @@ const MiniDrawer: FC<DashboardLayoutProps> = ({ children }) => {
       <AppBar position="fixed" open={open}>
         <Toolbar
           sx={{
-            backgroundColor: "#0043A3",
+            backgroundColor: "#2C3680",
             height: "80px",
             display: "flex",
             justifyContent: "space-between",
@@ -238,6 +234,7 @@ const MiniDrawer: FC<DashboardLayoutProps> = ({ children }) => {
           <ProfileOptions userName={"Nisia Ramirez"} />
         </Toolbar>
       </AppBar>
+
       <Drawer
         variant="permanent"
         onMouseEnter={handleHoverOpen}
@@ -246,7 +243,8 @@ const MiniDrawer: FC<DashboardLayoutProps> = ({ children }) => {
         sx={{
           zIndex: 100,
           "& .MuiDrawer-paperAnchorLeft": {
-            backgroundColor: "black",
+            backgroundColor: "#2C368040",
+            // opacity: 0.3,
             // ":hover": {
             //   width: "160px",
             //   opacity: "96%",

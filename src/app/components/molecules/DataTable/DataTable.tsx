@@ -11,6 +11,7 @@ const DataTable: FC<DataTablesProps> = ({ rows, columns }) => {
   return (
     <div style={{ height: 368, width: "100%" }}>
       <DataGrid
+        editMode="row"
         sx={{ border: 0 }}
         rows={rows}
         columns={columns}

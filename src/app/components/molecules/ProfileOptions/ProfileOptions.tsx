@@ -45,7 +45,7 @@ const ProfileOptions: FC<ProfileOptionsProps> = ({ userName, userProfile }) => {
           },
         }}
       >
-        <Typography sx={{ fontSize: "14px", fontWeight: "medium" }}>
+        <Typography sx={{ fontSize: "14px", fontWeight: 700, color: "white" }}>
           {userName}
         </Typography>
       </Box>
