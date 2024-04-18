@@ -1,7 +1,4 @@
 import {
-  DataGrid,
-  GridActionsCellItem,
-  GridColDef,
   GridEventListener,
   GridRowEditStopReasons,
   GridRowId,
@@ -10,309 +7,68 @@ import {
   GridRowModesModel,
 } from "@mui/x-data-grid";
 import ContentCard from "../../atoms/ContentCard";
-import DataTable from "../../molecules/DataTable";
-import TableCellItem from "../../atoms/TableCellItem";
-import StatusChip from "../../atoms/StatusChip";
-import { Box, Tab, Tabs, Typography } from "@mui/material";
-import TableCellHeader from "../../atoms/TableCellHeader";
-import { useEffect, useState } from "react";
-import Image from "next/image";
-
-import EditIcon from "@mui/icons-material/Edit";
-import DeleteIcon from "@mui/icons-material/DeleteOutlined";
+import { Box, Typography } from "@mui/material";
 import SaveIcon from "@mui/icons-material/Save";
 import CancelIcon from "@mui/icons-material/Close";
+import { useEffect, useRef, useState } from "react";
 
-import dotsIcon from "../../../../../public/dotsIcon.svg";
 import EditButton from "../../atoms/EditButton";
 import {
   useDeletePackagesDeleteMutation,
-  useGetPackagesAllQuery,
+  useGetPackagesViewPaginatedQuery,
   usePatchPackagesUpdateMutation,
   usePostPackagesAddMutation,
 } from "@/app/store/fitOf";
-import {
-  addPackage,
-  getPackageToBeAdded,
-  getPackages,
-} from "@/app/features/dashboard/packageSlice";
-import { useDispatch, useSelector } from "react-redux";
+import CustomTabPanel from "./CustomTabPanel";
+import TableTabs from "./TableTabs";
+import TableContent from "./TableContent";
+import { FetchBaseQueryError } from "@reduxjs/toolkit/query";
 
-const initialRows = [
-  {
-    id: 0,
-    carrier: "UPS",
-    trackingNo: "1Z8152430368220883",
-    status: "Outgoing",
-    condition: "Good",
-    sender: "Clancey, Cliff",
-    recipient: "Forde, Tony",
-    comments: "Lorem Ipsum",
-  },
-  {
-    id: 1,
-    carrier: "UPS",
-    trackingNo: "1Z8152430368220883",
-    status: "Incoming",
-    condition: "Good",
-    sender: "Clancey, Cliff",
-    recipient: "Forde, Tony",
-    comments: "Lorem Ipsum",
-  },
-  {
-    id: 2,
-    carrier: "UPS",
-    trackingNo: "1Z8152430368220883",
-    status: "Outgoing",
-    condition: "Good",
-    sender: "Clancey, Cliff",
-    recipient: "Forde, Tony",
-    comments: "Lorem Ipsum",
-  },
-  {
-    id: 3,
-    carrier: "UPS",
-    trackingNo: "1Z8152430368220883",
-    status: "Outgoing",
-    condition: "Good",
-    sender: "Clancey, Cliff",
-    recipient: "Forde, Tony",
-    comments: "Lorem Ipsum",
-  },
-  {
-    id: 4,
-    carrier: "UPS",
-    trackingNo: "1Z8152430368220883",
-    status: "Incoming",
-    condition: "Good",
-    sender: "Clancey, Cliff",
-    recipient: "Forde, Tony",
-    comments: "Lorem Ipsum",
-  },
-  {
-    id: 5,
-    carrier: "UPS",
-    trackingNo: "1Z8152430368220883",
-    status: "Outgoing",
-    condition: "Good",
-    sender: "Clancey, Cliff",
-    recipient: "Forde, Tony",
-    comments: "Lorem Ipsum",
-  },
-  {
-    id: 6,
-    carrier: "UPS",
-    trackingNo: "1Z8152430368220883",
-    status: "Incoming",
-    condition: "Good",
-    sender: "Clancey, Cliff",
-    recipient: "Forde, Tony",
-    comments: "Lorem Ipsum",
-  },
-];
-
-const handleOptionsClick = (id: number) => {
-  console.log("options button clicked", id);
-};
-
-interface TabPanelProps {
-  children?: React.ReactNode;
-  index: number;
-  value: number;
-}
-
-function CustomTabPanel(props: TabPanelProps) {
-  const { children, value, index } = props;
-
-  return (
-    <Box
-      role="tabpanel"
-      sx={{
-        display: value !== index ? "none" : undefined,
-        width: "100",
-        maxWidth: "100%",
-        // border: "1px solid red",
-      }}
-    >
-      {value === index && <Box>{children}</Box>}
-    </Box>
-  );
+export interface IPackage {
+  id: number;
+  trackingNo: string;
+  carrier: string;
+  status: string;
+  condition: string;
+  sender: string;
+  recipient: string;
+  comments: string;
+  urgent: number;
+  editing?: boolean;
 }
 
 const DashboardDataTable = () => {
-  const dispatch = useDispatch();
   const [tabValue, setTabValue] = useState(4);
+  const [rowModesModel, setRowModesModel] = useState<GridRowModesModel>({});
+  const [bulkEditMode, setBulkEditMode] = useState(false);
 
   const handleChange = (event: React.SyntheticEvent, newValue: number) => {
-    console.log("new value is", newValue);
     setTabValue(newValue);
   };
 
-  const columns: GridColDef[] = [
-    {
-      field: "carrier",
-      flex: 0.75,
-      type: "singleSelect",
-      valueOptions: ["UPS", "DHL", "FedEx", "TCS"],
-      renderHeader: () => {
-        return <TableCellHeader text="Carrier" />;
-      },
-      renderCell: (params) => {
-        return <TableCellItem text={params.value} />;
-      },
-      editable: true,
-    },
-    {
-      field: "trackingNo",
-      flex: 1.5,
-      renderHeader: () => {
-        return <TableCellHeader text="Tracking #" />;
-      },
-      renderCell: (params) => {
-        return <TableCellItem text={params.value} />;
-      },
-      editable: true,
-    },
-    {
-      field: "status",
-      flex: 1,
-      renderHeader: () => {
-        return <TableCellHeader text="Status" />;
-      },
-      type: "singleSelect",
-      valueOptions: ["Incoming", "Outgoing"],
-      renderCell: (params) => {
-        return (
-          <StatusChip
-            text={params.value}
-            backgroundColor={
-              params.value === "Incoming"
-                ? "#ABE5C3"
-                : params.value === "Outgoing"
-                ? "#E5CEAB"
-                : "red"
-            }
-          />
-        );
-      },
-      editable: true,
-    },
-    {
-      field: "condition",
-      flex: 1,
-      type: "singleSelect",
-      valueOptions: ["Good", "Moderate", "Damaged"],
-      editable: true,
-      renderHeader: () => {
-        return <TableCellHeader text="Condition" />;
-      },
-      renderCell: (params) => {
-        return <TableCellItem text={params.value} />;
-      },
-    },
-    {
-      field: "sender",
-      flex: 1,
-      renderHeader: () => {
-        return <TableCellHeader text="Sender" />;
-      },
-      renderCell: (params) => {
-        return <TableCellItem text={params.value} />;
-      },
-      editable: true,
-    },
-    {
-      field: "recipient",
-      flex: 1,
-      renderHeader: () => {
-        return <TableCellHeader text="Recipient" />;
-      },
-      renderCell: (params) => {
-        return <TableCellItem text={params.value} />;
-      },
-      editable: true,
-    },
-    {
-      field: "comments",
-      flex: 1,
-      renderHeader: () => {
-        return <TableCellHeader text="Comments" />;
-      },
-      renderCell: (params) => {
-        return <TableCellItem text={params.value} />;
-      },
-      editable: true,
-    },
-    {
-      field: "actions",
-      flex: 1,
-      type: "actions",
-      renderHeader: () => {
-        return <TableCellHeader text="Actions" />;
-      },
-      getActions: ({ id }) => {
-        const isInEditMode = rowModesModel[id]?.mode === GridRowModes.Edit;
-
-        if (isInEditMode) {
-          return [
-            <GridActionsCellItem
-              key={0}
-              icon={<SaveIcon />}
-              label="Save"
-              sx={{
-                color: "primary.main",
-              }}
-              onClick={handleSaveClick(id)}
-            />,
-            <GridActionsCellItem
-              key={1}
-              icon={<CancelIcon />}
-              label="Cancel"
-              className="textPrimary"
-              onClick={handleCancelClick(id)}
-              color="inherit"
-            />,
-          ];
+  const [rows, setRows] = useState<IPackage[]>([]);
+  const updatedRows = useRef<IPackage[]>([]);
+  const setUpdatedRows = (update: IPackage) => {
+    if (bulkEditMode) {
+      if (updatedRows.current.length > 0) {
+        if (updatedRows.current.find((r) => r.id === update.id)) {
+          updatedRows.current = updatedRows.current.map(
+            (row: IPackage, index) =>
+              row.id === update.id ? { ...update } : row
+          );
+        } else {
+          updatedRows.current.push(update);
         }
-
-        return [
-          <GridActionsCellItem
-            key={0}
-            icon={<EditIcon />}
-            label="Edit"
-            className="textPrimary"
-            onClick={handleEditClick(id)}
-            color="inherit"
-          />,
-          <GridActionsCellItem
-            key={1}
-            icon={<DeleteIcon />}
-            label="Delete"
-            onClick={handleDeleteClick(id)}
-            color="inherit"
-          />,
-        ];
-      },
-      // renderCell: (params) => {
-      //   return (
-      //     <Box
-      //       onClick={() => handleOptionsClick(Number(params.id))}
-      //       sx={{ width: "24px", ":hover": { cursor: "pointer" } }}
-      //     >
-      //       <Image src={dotsIcon} width={4} alt="options-icon" />
-      //     </Box>
-      //   );
-      // },
-    },
-  ];
-
-  const [rows, setRows] = useState([]);
-  const [rowModesModel, setRowModesModel] = useState<GridRowModesModel>({});
+      } else {
+        updatedRows.current = [update];
+      }
+    }
+  };
 
   const [currentPage, setCurrentPage] = useState(0);
   const [rowsPerPage, setRowsPerPage] = useState(10);
 
-  const { isLoading, data, error, status } = useGetPackagesAllQuery({
+  const { isLoading, data, error, status } = useGetPackagesViewPaginatedQuery({
     page: currentPage,
     limit: rowsPerPage,
   });
@@ -327,9 +83,8 @@ const DashboardDataTable = () => {
     },
   ] = usePatchPackagesUpdateMutation();
   useEffect(() => {
-    if (updateError) {
-      console.log(updateError, "Add error");
-      alert(updateError.data.errorMessage);
+    if (updateError && "data" in updateError) {
+      alert((updateError.data as FetchBaseQueryError).data);
     }
   }, [updateError]);
 
@@ -344,20 +99,18 @@ const DashboardDataTable = () => {
   ] = usePostPackagesAddMutation();
 
   useEffect(() => {
-    if (addData) {
-      console.log(addData, "add data");
-      setRows((prev) =>
+    if (addData && addData.package) {
+      setRows((prev: IPackage[]) =>
         prev.map((row) =>
-          row.id === -1 ? { ...row, id: addData.package.id } : row
+          row.id === -1 ? { ...row, id: addData.package!.id } : row
         )
       );
     }
   }, [addData]);
 
   useEffect(() => {
-    if (addError) {
-      console.log(addError, "Add error");
-      alert(addError.data.errorMessage);
+    if (addError && "data" in addError) {
+      alert((addError.data as FetchBaseQueryError).data);
     }
   }, [addError]);
 
@@ -372,9 +125,8 @@ const DashboardDataTable = () => {
   ] = useDeletePackagesDeleteMutation();
 
   useEffect(() => {
-    if (deleteError) {
-      console.log(deleteError, "delete error");
-      alert(deleteError.data.errorMessage);
+    if (deleteError && "data" in deleteError) {
+      alert((deleteError.data as FetchBaseQueryError).data);
     }
   }, [deleteError]);
 
@@ -385,79 +137,100 @@ const DashboardDataTable = () => {
     if (params.reason === GridRowEditStopReasons.rowFocusOut) {
       event.defaultMuiPrevented = true;
     }
+    setRows(
+      rows.filter((row) =>
+        row.id === params.row.id
+          ? { ...row, editing: true }
+          : { ...row, editing: false }
+      )
+    );
   };
 
-  const handleEditClick = (id: GridRowId) => () => {
-    setRowModesModel({ ...rowModesModel, [id]: { mode: GridRowModes.Edit } });
-  };
-
-  const handleSaveClick = (id: GridRowId) => () => {
-    setRowModesModel({ ...rowModesModel, [id]: { mode: GridRowModes.View } });
-  };
-
-  const handleDeleteClick = (id: GridRowId) => () => {
+  const handleDeleteClick = (id: GridRowId) => {
     deletePackage({ requestDeletePackage: { id: Number(id) } });
     setRows(rows.filter((row) => row.id !== id));
   };
 
-  const handleCancelClick = (id: GridRowId) => () => {
-    setRowModesModel({
-      ...rowModesModel,
-      [id]: { mode: GridRowModes.View, ignoreModifications: true },
-    });
-
-    const editedRow = rows.find((row) => row.id === id);
-    if (editedRow!.isNew) {
-      setRows(rows.filter((row) => row.id !== id));
-    }
-  };
-
   const processRowUpdate = (newRow: GridRowModel) => {
-    console.log("update", newRow);
-    if (newRow.id === -1) {
-      addPackageFunc({
-        requestAddPackage: {
-          newPackage: {
-            trackingNumber: newRow.trackingNo,
-            carrier: newRow.carrier,
-            status: newRow.status,
-            condition: newRow.condition,
-            sender: newRow.sender,
-            recipientName: newRow.recipient,
-            comment: newRow.comments,
-            urgent: 1,
+    if (!bulkEditMode) {
+      if (newRow.id === -1) {
+        addPackageFunc({
+          requestAddPackage: {
+            newPackage: {
+              trackingNumber: newRow.trackingNo,
+              carrier: newRow.carrier,
+              status: newRow.status,
+              condition: newRow.condition,
+              sender: newRow.sender,
+              recipientName: newRow.recipient,
+              comment: newRow.comments,
+              urgent: 1,
+            },
           },
-        },
-      });
-      let updatedRow = {
-        id: newRow.id,
-        trackingNo: newRow.trackingNo,
-        carrier: newRow.carrier,
-        status: newRow.status,
-        condition: newRow.condition,
-        sender: newRow.sender,
-        recipient: newRow.recipient,
-        comments: newRow.comments,
-        urgent: 1,
-        isNew: false,
-      };
-      setRows(rows.map((row) => (row.id === newRow.id ? updatedRow : row)));
-      return updatedRow;
+        });
+        let updatedRow = {
+          id: newRow.id,
+          trackingNo: newRow.trackingNo,
+          carrier: newRow.carrier,
+          status: newRow.status,
+          condition: newRow.condition,
+          sender: newRow.sender,
+          recipient: newRow.recipient,
+          comments: newRow.comments,
+          urgent: 1,
+          isNew: false,
+        };
+        setRows(rows.map((row) => (row.id === newRow.id ? updatedRow : row)));
+        return updatedRow;
+      } else {
+        const updatedRow: IPackage = {
+          id: newRow.id,
+          trackingNo: newRow.trackingNo,
+          carrier: newRow.carrier,
+          status: newRow.status,
+          condition: newRow.condition,
+          sender: newRow.sender,
+          recipient: newRow.recipient,
+          comments: newRow.comments,
+          urgent: newRow.urgent,
+        };
+        updatePackage({ requestUpdatePackage: { packages: [newRow] } });
+        setRows(rows.map((row) => (row.id === newRow.id ? updatedRow : row)));
+        return updatedRow;
+      }
     } else {
-      const updatedRow = { ...newRow, isNew: false };
-      updatePackage({ requestUpdatePackage: { packages: [newRow] } });
-      setRows(rows.map((row) => (row.id === newRow.id ? updatedRow : row)));
-      return updatedRow;
+      setBulkEditMode(false);
+      if (updatedRows.current.length > 0) {
+        updatePackage({
+          requestUpdatePackage: {
+            packages: updatedRows.current.map((row) => ({
+              id: row.id,
+              trackingNumber: row.trackingNo,
+              carrier: row.carrier,
+              status: row.status,
+              condition: row.condition,
+              sender: row.sender,
+              recipientName: row.recipient,
+              comment: row.comments,
+              urgent: true,
+            })),
+          },
+        });
+        updatedRows.current = [];
+        const tempRowsModel = { ...rowModesModel };
+        rows.forEach((row) => {
+          tempRowsModel[row.id] = {
+            mode: GridRowModes.View,
+            ignoreModifications: false,
+          };
+        });
+        setRowModesModel(tempRowsModel);
+      }
     }
-  };
-
-  const handleRowModesModelChange = (newRowModesModel: GridRowModesModel) => {
-    setRowModesModel(newRowModesModel);
   };
 
   useEffect(() => {
     if (data) {
-      // console.log(data);
       const { page, limit, total, totalPages, packages } = data;
 
       setRows(
@@ -472,49 +245,13 @@ const DashboardDataTable = () => {
           comments: pckg.comment, // Add comments property
           urgent: pckg.urgent,
           isDeleted: pckg.isDeleted,
+          editing: false,
         })) || []
       );
     }
   }, [data, isLoading]);
 
-  let packageToBeAdded = useSelector(getPackageToBeAdded);
-  console.log(packageToBeAdded, "package to be added");
-  // const [tempId, setTempId] = useState(-1);
-
-  useEffect(() => {
-    // let id = -1; //Math.ceil(Math.random() * 10);
-
-    if (packageToBeAdded !== "") {
-      console.log(packageToBeAdded, "package to be added data");
-      setRows((prev) => {
-        return [
-          {
-            id: -1,
-            trackingNo: packageToBeAdded + "" || "",
-            carrier: "",
-            status: "",
-            condition: "",
-            sender: "",
-            recipient: "",
-            comments: "",
-            urgent: "",
-            isDeleted: false,
-          },
-          ...prev,
-        ];
-      });
-      setTabValue(4);
-      handleEditClick(-1);
-      dispatch(addPackage({ barcode: "" }));
-      // setTempId(id);
-    }
-  }, [packageToBeAdded, dispatch]);
-
   if (isLoading) return <h1>Loading...</h1>;
-
-  // if (error) {
-  //   // return <h1>An Error Occurred while fetching data</h1>;
-  // }
 
   return (
     <ContentCard padding={0}>
@@ -535,31 +272,7 @@ const DashboardDataTable = () => {
             borderRadius: "36px 36px 0px 0px",
           }}
         >
-          <Tabs
-            value={tabValue}
-            onChange={handleChange}
-            sx={{
-              "& .MuiTabs-indicator": {
-                backgroundColor: "#2C3680",
-                height: "4px",
-              },
-              "& .Mui-selected": {
-                fontWeight: "bold",
-                color: "#2C3680",
-              },
-              "& .MuiButtonBase-root-MuiTab-root": {
-                fontSize: "14px",
-                color: "black",
-                fontWeight: "bold",
-              },
-            }}
-          >
-            <Tab sx={{ textTransform: "capitalize" }} label="Pending" />
-            <Tab sx={{ textTransform: "capitalize" }} label="Outgoing" />
-            <Tab sx={{ textTransform: "capitalize" }} label="In-Transit" />
-            <Tab sx={{ textTransform: "capitalize" }} label="Delivered" />
-            <Tab sx={{ textTransform: "capitalize" }} label="All" />
-          </Tabs>
+          <TableTabs tabValue={tabValue} handleChange={handleChange} />
         </Box>
         <Box sx={{ display: "flex", justifyContent: "space-between" }}>
           <Typography
@@ -573,146 +286,144 @@ const DashboardDataTable = () => {
           >
             EDIT SCANNED PACKAGES
           </Typography>
-          <EditButton
-            handleOnClick={function (): void {
-              throw new Error("Function not implemented.");
-            }}
-          />
+          {bulkEditMode ? (
+            <Box
+              sx={{
+                display: "flex",
+                justifyContent: "flex-end",
+                gap: "16px",
+                margin: "16px",
+                height: "40px",
+              }}
+            >
+              <Box
+                onClick={() => {
+                  const tempRowsModel = { ...rowModesModel };
+                  rows.forEach((row) => {
+                    tempRowsModel[row.id] = {
+                      mode: GridRowModes.View,
+                      ignoreModifications: false,
+                    };
+                    // setRowModesModel((prev) => ({
+                    //   ...prev,
+                    //   [row.id]: {
+                    //     mode: GridRowModes.View,
+                    //   },
+                    // }));
+                  });
+                  setRowModesModel({ ...tempRowsModel });
+                  setBulkEditMode(false);
+                }}
+              >
+                <SaveIcon />
+              </Box>
+              <Box
+                onClick={() => {
+                  const tempRowsModel = { ...rowModesModel };
+                  rows.forEach((row) => {
+                    tempRowsModel[row.id] = {
+                      mode: GridRowModes.View,
+                      ignoreModifications: true,
+                    };
+                  });
+                  setRowModesModel(tempRowsModel);
+                  setBulkEditMode(false);
+                }}
+              >
+                <CancelIcon />
+              </Box>
+            </Box>
+          ) : (
+            <EditButton
+              handleOnClick={function (): void {
+                setBulkEditMode(true);
+                const tempRowsModel = { ...rowModesModel };
+                rows.forEach((row) => {
+                  tempRowsModel[row.id] = { mode: GridRowModes.Edit };
+                });
+                setRowModesModel(tempRowsModel);
+                // throw new Error("Function not implemented.");
+              }}
+            />
+          )}
         </Box>
         <CustomTabPanel value={tabValue} index={0}>
-          <DataGrid
-            editMode="row"
-            sx={{ border: 0 }}
+          <TableContent
             rows={rows.filter((row) => row.status.toLowerCase() === "pending")}
-            columns={columns}
-            initialState={{
-              pagination: {
-                paginationModel: { page: currentPage, pageSize: rowsPerPage },
-              },
-            }}
-            pageSizeOptions={[5, 10]}
-            checkboxSelection
-            disableRowSelectionOnClick
-            rowModesModel={rowModesModel}
-            onRowModesModelChange={handleRowModesModelChange}
-            onRowEditStop={handleRowEditStop}
+            setRows={setRows}
+            currentPage={currentPage}
+            rowsPerPage={rowsPerPage}
+            handleRowEditStop={handleRowEditStop}
             processRowUpdate={processRowUpdate}
-            // slots={{
-            //   toolbar: EditToolbar,
-            // }}
-            // slotProps={{
-            //   toolbar: { setRows, setRowModesModel },
-            // }}
+            handleDeleteClick={handleDeleteClick}
+            rowModesModel={rowModesModel}
+            setRowModesModel={setRowModesModel}
+            updatedRows={updatedRows}
+            setUpdatedRows={setUpdatedRows}
           />
         </CustomTabPanel>
         <CustomTabPanel value={tabValue} index={1}>
-          <DataGrid
-            editMode="row"
-            sx={{ border: 0 }}
+          <TableContent
             rows={rows.filter((row) => row.status.toLowerCase() === "outgoing")}
-            columns={columns}
-            initialState={{
-              pagination: {
-                paginationModel: { page: currentPage, pageSize: rowsPerPage },
-              },
-            }}
-            pageSizeOptions={[5, 10]}
-            checkboxSelection
-            disableRowSelectionOnClick
-            rowModesModel={rowModesModel}
-            onRowModesModelChange={handleRowModesModelChange}
-            onRowEditStop={handleRowEditStop}
+            setRows={setRows}
+            currentPage={currentPage}
+            rowsPerPage={rowsPerPage}
+            handleRowEditStop={handleRowEditStop}
             processRowUpdate={processRowUpdate}
-            // slots={{
-            //   toolbar: EditToolbar,
-            // }}
-            // slotProps={{
-            //   toolbar: { setRows, setRowModesModel },
-            // }}
+            handleDeleteClick={handleDeleteClick}
+            rowModesModel={rowModesModel}
+            setRowModesModel={setRowModesModel}
+            updatedRows={updatedRows}
+            setUpdatedRows={setUpdatedRows}
           />
         </CustomTabPanel>
         <CustomTabPanel value={tabValue} index={2}>
-          <DataGrid
-            editMode="row"
-            sx={{ border: 0 }}
+          <TableContent
             rows={rows.filter(
               (row) => row.status.toLowerCase() === "intransit"
             )}
-            columns={columns}
-            initialState={{
-              pagination: {
-                paginationModel: { page: currentPage, pageSize: rowsPerPage },
-              },
-            }}
-            pageSizeOptions={[5, 10]}
-            checkboxSelection
-            disableRowSelectionOnClick
-            rowModesModel={rowModesModel}
-            onRowModesModelChange={handleRowModesModelChange}
-            onRowEditStop={handleRowEditStop}
+            setRows={setRows}
+            currentPage={currentPage}
+            rowsPerPage={rowsPerPage}
+            handleRowEditStop={handleRowEditStop}
             processRowUpdate={processRowUpdate}
-            // slots={{
-            //   toolbar: EditToolbar,
-            // }}
-            // slotProps={{
-            //   toolbar: { setRows, setRowModesModel },
-            // }}
+            handleDeleteClick={handleDeleteClick}
+            rowModesModel={rowModesModel}
+            setRowModesModel={setRowModesModel}
+            updatedRows={updatedRows}
+            setUpdatedRows={setUpdatedRows}
           />
         </CustomTabPanel>
         <CustomTabPanel value={tabValue} index={3}>
-          <DataGrid
-            editMode="row"
-            sx={{ border: 0 }}
+          <TableContent
             rows={rows.filter(
               (row) => row.status.toLowerCase() === "delivered"
             )}
-            columns={columns}
-            initialState={{
-              pagination: {
-                paginationModel: { page: currentPage, pageSize: rowsPerPage },
-              },
-            }}
-            pageSizeOptions={[5, 10]}
-            checkboxSelection
-            disableRowSelectionOnClick
-            rowModesModel={rowModesModel}
-            onRowModesModelChange={handleRowModesModelChange}
-            onRowEditStop={handleRowEditStop}
+            setRows={setRows}
+            currentPage={currentPage}
+            rowsPerPage={rowsPerPage}
+            handleRowEditStop={handleRowEditStop}
             processRowUpdate={processRowUpdate}
-            // slots={{
-            //   toolbar: EditToolbar,
-            // }}
-            // slotProps={{
-            //   toolbar: { setRows, setRowModesModel },
-            // }}
+            handleDeleteClick={handleDeleteClick}
+            rowModesModel={rowModesModel}
+            setRowModesModel={setRowModesModel}
+            updatedRows={updatedRows}
+            setUpdatedRows={setUpdatedRows}
           />
         </CustomTabPanel>
         <CustomTabPanel value={tabValue} index={4}>
-          <DataGrid
-            editMode="row"
-            sx={{ border: 0 }}
+          <TableContent
             rows={rows}
-            columns={columns}
-            initialState={{
-              pagination: {
-                paginationModel: { page: currentPage, pageSize: rowsPerPage },
-              },
-            }}
-            pageSizeOptions={[5, 10]}
-            checkboxSelection
-            disableRowSelectionOnClick
-            rowModesModel={rowModesModel}
-            onRowModesModelChange={handleRowModesModelChange}
-            onRowEditStop={handleRowEditStop}
+            setRows={setRows}
+            currentPage={currentPage}
+            rowsPerPage={rowsPerPage}
+            handleRowEditStop={handleRowEditStop}
             processRowUpdate={processRowUpdate}
-            // onPageSizeChange={handlePageSizeChange}
-
-            // slots={{
-            //   toolbar: EditToolbar,
-            // }}
-            // slotProps={{
-            //   toolbar: { setRows, setRowModesModel },
-            // }}
+            handleDeleteClick={handleDeleteClick}
+            rowModesModel={rowModesModel}
+            setRowModesModel={setRowModesModel}
+            updatedRows={updatedRows}
+            setUpdatedRows={setUpdatedRows}
           />
         </CustomTabPanel>
       </Box>

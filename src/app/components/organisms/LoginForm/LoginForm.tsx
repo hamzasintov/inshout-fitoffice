@@ -16,6 +16,7 @@ import { usePostUsersLoginMutation } from "@/app/store/fitOf";
 import { SetStateAction, useEffect, useState } from "react";
 import { setUser } from "@/app/features/auth/authSlice";
 import { useDispatch } from "react-redux";
+import { useLogin } from "@/app/hooks/useLogin";
 
 const LoginForm = () => {
   const router = useRouter();
@@ -28,8 +29,11 @@ const LoginForm = () => {
 
   const emailRegex = /^[a-zA-Z0-9._-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,6}$/;
 
-  const [postUsersLogin, { isLoading, data, error, status }] =
-    usePostUsersLoginMutation();
+  // const [postUsersLogin, { isLoading, data, error, status }] =
+  //   usePostUsersLoginMutation();
+
+  const { postUsersLogin, loginLoading, loginData, loginError, loginStatus } =
+    useLogin();
 
   const handleSetEmail = (e: { target: { value: SetStateAction<string> } }) => {
     setEmail(e.target.value);
@@ -57,18 +61,20 @@ const LoginForm = () => {
   };
 
   useEffect(() => {
-    if (data) {
-      console.log("data is", data);
-      dispatch(setUser({ user: data, accessToken: data.accessToken }));
+    if (loginData) {
+      console.log("data is", loginData);
+      dispatch(
+        setUser({ user: loginData, accessToken: loginData.accessToken })
+      );
       router.push("/admin-panel/tracking");
     }
-    if (error && "data" in error) {
-      const data = JSON.stringify(error.data);
+    if (loginError && "data" in loginError) {
+      const data = JSON.stringify(loginError.data);
       const parsedData = JSON.parse(data);
       console.log("error message", parsedData.errorMessage);
       setApiError(parsedData.errorMessage);
     }
-  }, [data, dispatch, error, router]);
+  }, [dispatch, loginData, loginError, router]);
 
   return (
     <>
@@ -105,7 +111,7 @@ const LoginForm = () => {
             <CircularProgress
               sx={{
                 marginTop: 2,
-                visibility: !isLoading ? "hidden" : "",
+                visibility: !loginLoading ? "hidden" : "",
               }}
             />
           </Box>
@@ -125,7 +131,7 @@ const LoginForm = () => {
             variant="contained"
             textTransform="capitalize"
             textColor="white"
-            disabled={isLoading || disableButton}
+            disabled={loginLoading || disableButton}
           />
           <PrivacyPolicyText />
         </Box>

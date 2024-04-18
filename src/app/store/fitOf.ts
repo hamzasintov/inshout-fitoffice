@@ -67,12 +67,12 @@ const injectedRtkApi = api.injectEndpoints({
         body: queryArg.requestDeletePackage,
       }),
     }),
-    getPackagesAll: build.query<
-      GetPackagesAllApiResponse,
-      GetPackagesAllApiArg
+    getPackagesViewPaginated: build.query<
+      GetPackagesViewPaginatedApiResponse,
+      GetPackagesViewPaginatedApiArg
     >({
       query: (queryArg) => ({
-        url: `/packages/all`,
+        url: `/packages/viewPaginated`,
         params: { page: queryArg.page, limit: queryArg.limit },
       }),
     }),
@@ -129,18 +129,19 @@ export type DeletePackagesDeleteApiArg = {
   /** Delete the package by using the Id */
   requestDeletePackage: RequestDeletePackage;
 };
-export type GetPackagesAllApiResponse = /** status 200 Returns all packages */ {
-  /** Current page number */
-  page?: number;
-  /** Number of packages per page */
-  limit?: number;
-  /** Total number of packages */
-  total?: number;
-  /** Total number of pages */
-  totalPages?: number;
-  packages?: Packages[];
-};
-export type GetPackagesAllApiArg = {
+export type GetPackagesViewPaginatedApiResponse =
+  /** status 200 Returns all packages */ {
+    /** Current page number */
+    page?: number;
+    /** Number of packages per page */
+    limit?: number;
+    /** Total number of packages */
+    total?: number;
+    /** Total number of pages */
+    totalPages?: number;
+    packages?: Packages[];
+  };
+export type GetPackagesViewPaginatedApiArg = {
   /** Page number */
   page?: number;
   /** Number of packages per page */
@@ -272,6 +273,6 @@ export const {
   usePostUsersResetPasswordMutation,
   usePostPackagesAddMutation,
   useDeletePackagesDeleteMutation,
-  useGetPackagesAllQuery,
+  useGetPackagesViewPaginatedQuery,
   usePatchPackagesUpdateMutation,
 } = injectedRtkApi;
