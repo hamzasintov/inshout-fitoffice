@@ -18,7 +18,7 @@ const TwoFactorAuthForm = () => {
         check your email for an authentication code. "
     >
       <Box sx={{ width: "100%" }}>
-        <InputEmail />
+        <InputEmail email="" handleSetEmail={() => {}} />
         <PrimarySwitch text="Remember this device?" />
         <PrimaryButton
           label="Authenticate"
@@ -30,6 +30,7 @@ const TwoFactorAuthForm = () => {
           height="56px"
           textTransform="capitalize"
           textColor="white"
+          disabled={false}
         />
       </Box>
     </OnboardingFormWrapper>

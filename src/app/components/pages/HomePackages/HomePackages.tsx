@@ -8,6 +8,9 @@ import PrimaryButton from "../../atoms/PrimaryButton";
 import SelectItem from "../../atoms/SelectItem";
 import DashboardDataTable from "../../organisms/DashboardDataTable";
 import PackageProcessingCard from "../../organisms/PackageProcessingCard";
+import LineChart from "../../organisms/DashboardDataTable/charts/LineChart";
+import DoughnutChart from "../../organisms/DashboardDataTable/charts/DoughnutChart";
+import ChartIcon from "../../icons/ChartIcon";
 
 const HomePackages = () => {
   const handleExportToXLSX = () => {
@@ -44,21 +47,34 @@ const HomePackages = () => {
                 label="Export to XLSX"
                 variant="outlined"
                 handleOnClick={handleExportToXLSX}
+                disabled={false}
+                marginLeft={0.5}
+                marginRight={0.5}
               />
               <PrimaryButton
                 label="Clear"
                 variant="outlined"
                 handleOnClick={handleClear}
+                disabled={false}
+                marginLeft={0.5}
+                marginRight={0.5}
               />
               <PrimaryButton
                 label="Print"
                 variant="outlined"
                 handleOnClick={handlePrint}
+                disabled={false}
+                marginLeft={0.5}
+                marginRight={0.5}
               />
               <PrimaryButton
                 label="View"
                 variant="contained"
+                textColor="white"
                 handleOnClick={handleView}
+                disabled={false}
+                marginLeft={0.5}
+                marginRight={0.5}
               />
             </Box>
           </ContentCard>
@@ -104,10 +120,31 @@ const HomePackages = () => {
           </ContentCard>
         </Grid>
         <Grid item md={4} xs={12}>
-          <ContentCard height={400}>second card</ContentCard>
+          <ContentCard height={400}>
+            <Box sx={{ display: "flex", flexDirection: "row", gap: "12px" }}>
+              <Box>
+                <ChartIcon />
+              </Box>
+              <Typography>Incoming and outgoing packages</Typography>
+            </Box>
+            <LineChart />
+          </ContentCard>
         </Grid>
         <Grid item md={4} xs={12}>
-          <ContentCard height={400}>third card</ContentCard>
+          <ContentCard
+            height={400}
+            // sx={{ display: "flex", flexDirection: "column" }}
+          >
+            <Box sx={{ display: "flex", flexDirection: "row", gap: "12px" }}>
+              <Box>
+                <ChartIcon />
+              </Box>
+              <Typography>Daily facilities completion status</Typography>
+            </Box>
+            <Box sx={{ overflow: "hidden", flex: 1 }}>
+              <DoughnutChart />
+            </Box>
+          </ContentCard>
         </Grid>
       </Grid>
     </Box>

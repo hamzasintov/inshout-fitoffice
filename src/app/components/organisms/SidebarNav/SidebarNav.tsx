@@ -98,7 +98,7 @@ const DashboardLayout: FC<DashboardLayoutProps> = ({ children }) => {
               sx={{
                 color: "white",
                 "&:hover": {
-                  backgroundColor: "#094DAE",
+                  backgroundColor: "#2C3680",
                 },
               }}
             >
@@ -147,7 +147,7 @@ const DashboardLayout: FC<DashboardLayoutProps> = ({ children }) => {
       >
         <Toolbar
           sx={{
-            backgroundColor: "#0043A3",
+            backgroundColor: "#2C3680",
             height: "80px",
             display: "flex",
             justifyContent: "space-between",

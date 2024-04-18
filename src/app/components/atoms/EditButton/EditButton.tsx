@@ -14,7 +14,7 @@ const EditButton: FC<EditButtonProps> = ({ handleOnClick }) => {
       onClick={handleOnClick}
       variant="contained"
       sx={{
-        backgroundColor: "#007A35 !important",
+        backgroundColor: "#2C3680 !important",
         margin: "16px",
         height: "40px",
       }}
