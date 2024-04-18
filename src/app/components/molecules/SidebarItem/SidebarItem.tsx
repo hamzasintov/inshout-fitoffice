@@ -10,7 +10,7 @@ interface SidebarItemProps {
 const SidebarItem: FC<SidebarItemProps> = ({ label, image, handleOnClick }) => {
   return (
     <div
-      className="flex p-4 hover:bg-[#2C3680] hover:rounded-r-full"
+      className="flex p-4 hover:bg-[#007A35] hover:rounded-r-full"
       onClick={handleOnClick}
     >
       <Image src={image} width={18} height={18} alt="icon" />

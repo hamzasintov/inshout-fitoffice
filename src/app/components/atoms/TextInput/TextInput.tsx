@@ -5,17 +5,9 @@ interface TextInputProps {
   label: string;
   type: string;
   fullWidth?: boolean;
-  value: string;
-  onChange: (e: any) => void;
 }
 
-const TextInput: FC<TextInputProps> = ({
-  label,
-  type,
-  fullWidth,
-  value,
-  onChange,
-}) => {
+const TextInput: FC<TextInputProps> = ({ label, type, fullWidth }) => {
   return (
     <Box sx={{ marginRight: "4px", marginLeft: "4px" }}>
       <Typography
@@ -34,8 +26,6 @@ const TextInput: FC<TextInputProps> = ({
         type={type}
         size="small"
         fullWidth={fullWidth}
-        value={value}
-        onChange={onChange}
       />
     </Box>
   );
