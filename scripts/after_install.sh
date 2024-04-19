@@ -1,7 +1,7 @@
 #!/bin/bash
 
 # navigate to project folder
-cd /inshout-fitOffice
+cd /home/ubuntu/inshout-fitOffice
 
 # install dependencies
 npm install

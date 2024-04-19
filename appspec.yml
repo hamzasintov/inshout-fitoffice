@@ -4,7 +4,7 @@ os: linux
 
 files:
   - source: /
-    destination: //home/ubuntu/inshout-fitOffice
+    destination: /home/ubuntu/inshout-fitOffice
     overwrite: true
 
 #permissions:
